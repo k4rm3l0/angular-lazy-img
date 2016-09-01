@@ -14,8 +14,8 @@
 angular.module('angularLazyImg', []);
 
 angular.module('angularLazyImg').factory('LazyImgMagic', [
-  '$window', '$rootScope', 'lazyImgConfig', 'lazyImgHelpers',
-  function($window, $rootScope, lazyImgConfig, lazyImgHelpers){
+  '$window', '$rootScope', 'lazyImgConfig', 'lazyImgHelpers', '$timeout',
+  function($window, $rootScope, lazyImgConfig, lazyImgHelpers, $timeout){
     'use strict';
 
     var winDimensions, $win, images, isListening, options;
@@ -32,14 +32,16 @@ angular.module('angularLazyImg').factory('LazyImgMagic', [
     containers = [options.container || $win];
 
     function checkImages(){
-      for(var i = images.length - 1; i >= 0; i--){
-        var image = images[i];
-        if(image && lazyImgHelpers.isElementInView(image.$elem[0], options.offset, winDimensions)){
-          loadImage(image);
-          images.splice(i, 1);
+      $timeout(function () {
+        for(var i = images.length - 1; i >= 0; i--){
+          var image = images[i];
+          if(image && lazyImgHelpers.isElementInView(image.$elem[0], options.offset, winDimensions)){
+            loadImage(image);
+            images.splice(i, 1);
+          }
         }
-      }
-      if(images.length === 0){ stopListening(); }
+        if(images.length === 0){ stopListening(); }
+      },options.loadingDelay);
     }
 
     checkImagesT = lazyImgHelpers.throttle(checkImages, 30);

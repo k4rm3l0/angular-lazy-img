@@ -6,7 +6,8 @@ angular.module('angularLazyImg').provider('lazyImgConfig', function() {
     errorClass   : null,
     successClass : null,
     onError      : function(){},
-    onSuccess    : function(){}
+    onSuccess    : function(){},
+    loadingDelay : 1
   };
 
   this.$get = function() {

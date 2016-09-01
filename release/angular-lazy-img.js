@@ -14,8 +14,8 @@
 angular.module('angularLazyImg', []);
 
 angular.module('angularLazyImg').factory('LazyImgMagic', [
-  '$window', '$rootScope', 'lazyImgConfig', 'lazyImgHelpers',
-  function($window, $rootScope, lazyImgConfig, lazyImgHelpers){
+  '$window', '$rootScope', 'lazyImgConfig', 'lazyImgHelpers', '$timeout',
+  function($window, $rootScope, lazyImgConfig, lazyImgHelpers, $timeout){
     'use strict';
 
     var winDimensions, $win, images, isListening, options;
@@ -32,14 +32,16 @@ angular.module('angularLazyImg').factory('LazyImgMagic', [
     containers = [options.container || $win];
 
     function checkImages(){
-      for(var i = images.length - 1; i >= 0; i--){
-        var image = images[i];
-        if(image && lazyImgHelpers.isElementInView(image.$elem[0], options.offset, winDimensions)){
-          loadImage(image);
-          images.splice(i, 1);
+      $timeout(function () {
+        for(var i = images.length - 1; i >= 0; i--){
+          var image = images[i];
+          if(image && lazyImgHelpers.isElementInView(image.$elem[0], options.offset, winDimensions)){
+            loadImage(image);
+            images.splice(i, 1);
+          }
         }
-      }
-      if(images.length === 0){ stopListening(); }
+        if(images.length === 0){ stopListening(); }
+      },options.loadingDelay);
     }
 
     checkImagesT = lazyImgHelpers.throttle(checkImages, 30);
@@ -146,7 +148,8 @@ angular.module('angularLazyImg').provider('lazyImgConfig', function() {
     errorClass   : null,
     successClass : null,
     onError      : function(){},
-    onSuccess    : function(){}
+    onSuccess    : function(){},
+    loadingDelay : 1
   };
 
   this.$get = function() {
@@ -218,10 +221,10 @@ angular.module('angularLazyImg')
       'use strict';
 
       function link(scope, element, attributes) {
-        var lazyImage = new LazyImgMagic(element);
-        attributes.$observe('lazyImg', function (newSource) {
+        var lazyImage = new LazyImgMagic(element),
+            deregister = attributes.$observe('lazyImg', function (newSource) {
           if (newSource) {
-            // in angular 1.3 it might be nice to remove observer here
+            deregister();
             lazyImage.setSource(newSource);
           }
         });
