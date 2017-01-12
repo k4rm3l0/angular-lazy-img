@@ -179,12 +179,13 @@ angular.module('angularLazyImg').factory('lazyImgHelpers', [
     function isElementInView(elem, offset, winDimensions) {
       var rect = elem.getBoundingClientRect();
       var bottomline = winDimensions.height + offset;
-      return (
-       rect.left >= 0 && rect.right <= winDimensions.width + offset && (
-         rect.top >= 0 && rect.top <= bottomline ||
-         rect.bottom <= bottomline && rect.bottom >= 0 - offset
-        )
-      );
+      return (rect.top >= 0 && rect.top <= bottomline) || (rect.bottom <= bottomline && rect.bottom >= 0 - offset);
+      // return (
+      //  rect.left >= 0 && rect.right <= winDimensions.width + offset && (
+      //    rect.top >= 0 && rect.top <= bottomline ||
+      //    rect.bottom <= bottomline && rect.bottom >= 0 - offset
+      //   )
+      // );
     }
 
     // http://remysharp.com/2010/07/21/throttling-function-calls/
