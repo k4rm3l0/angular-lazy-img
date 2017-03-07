@@ -13,16 +13,11 @@ angular.module('angularLazyImg')
             lazyImage.setSource(newSource);
           }
         });
-        attributes.$observe('lazyImgZoom', function(value) {
-            var zoom = parseFloat(value) || 100;
+        attributes.$observe('lazyImgZoom', function(newZoom) {
+            var zoom = parseFloat(newZoom) || 100;
             if(zoom > _THRESHOLD_VALUE){
                 if(attributes.lazyImgHq){
                     lazyImage.setSource(attributes.lazyImgHq);
-                    lazyImage.checkImages();
-                }
-            }else{
-                if(attributes.lazyImg){
-                    lazyImage.setSource(attributes.lazyImg);
                     lazyImage.checkImages();
                 }
             }
