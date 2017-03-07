@@ -231,18 +231,20 @@ angular.module('angularLazyImg')
             lazyImage.setSource(newSource);
           }
         });
-        var deregister2 = attributes.$observe('lazyImgZoom', function(value) {
-              var zoom = parseFloat(value);
-              if(attributes.lazyImg && attributes.lazyImg.length>0 && zoom){
-                  if(zoom > _THRESHOLD_VALUE){
-                      deregister2();
-                      console.log('lazyImgZoom', attributes.lazyImgHq);
-                      if(attributes.lazyImgHq){
-                          lazyImage.setSource(attributes.lazyImgHq);
-                      }
-                  }
-              }
-          });
+        attributes.$observe('lazyImgZoom', function(value) {
+            var zoom = parseFloat(value) || 100;
+            if(zoom > _THRESHOLD_VALUE){
+                if(attributes.lazyImgHq){
+                    lazyImage.setSource(attributes.lazyImgHq);
+                    lazyImage.checkImages();
+                }
+            }else{
+                if(attributes.lazyImg){
+                    lazyImage.setSource(attributes.lazyImg);
+                    lazyImage.checkImages();
+                }
+            }
+        });
         scope.$on('$destroy', function () {
           lazyImage.removeImage();
         });
@@ -252,17 +254,8 @@ angular.module('angularLazyImg')
         });
         $rootScope.$on('lazyImg:refresh', function () {
           lazyImage.checkImages();
-            console.log('CIAONE');
-        });
-        $rootScope.$on('lazyImg:edit', function (event, data) {
-            lazyImage.removeImage();
-            lazyImage.setSource(data);
-            $timeout(function () {
-                lazyImage.checkImages();
-            });
         });
       }
-
       return {
         link: link,
         restrict: 'A'
@@ -272,14 +265,12 @@ angular.module('angularLazyImg')
   .directive('lazyImgContainer', [
     'LazyImgMagic', function (LazyImgMagic) {
       'use strict';
-
       function link(scope, element) {
         LazyImgMagic.addContainer(element);
         scope.$on('$destroy', function () {
           LazyImgMagic.removeContainer(element);
         });
       }
-
       return {
         link: link,
         restrict: 'A'
