@@ -221,7 +221,8 @@ angular.module('angularLazyImg')
     '$rootScope', 'LazyImgMagic', '$timeout', function ($rootScope, LazyImgMagic, $timeout) {
       'use strict';
 
-      var _THRESHOLD_VALUE = 120;
+      var _THRESHOLD_HQ     = 120,
+          _THRESHOLD_XHQ    = 160;
 
       function link(scope, element, attributes) {
         var lazyImage = new LazyImgMagic(element);
@@ -231,13 +232,19 @@ angular.module('angularLazyImg')
             lazyImage.setSource(newSource);
           }
         });
-        attributes.$observe('lazyImgZoom', function(newZoom) {
+        var deregisterObserver = attributes.$observe('lazyImgZoom', function(newZoom) {
+
             var zoom = parseFloat(newZoom) || 100;
-            if(zoom > _THRESHOLD_VALUE){
-                if(attributes.lazyImgHq){
-                    lazyImage.setSource(attributes.lazyImgHq);
-                    lazyImage.checkImages();
-                }
+
+            if(attributes.lazyImgXhq && zoom > _THRESHOLD_XHQ){
+                lazyImage.setSource(attributes.lazyImgXhq);
+                lazyImage.checkImages();
+            }else if(attributes.lazyImgHq && zoom > _THRESHOLD_HQ){
+                lazyImage.setSource(attributes.lazyImgHq);
+                lazyImage.checkImages();
+            }else{
+                lazyImage.setSource(attributes.lazyImg);
+                lazyImage.checkImages();
             }
         });
         scope.$on('$destroy', function () {
