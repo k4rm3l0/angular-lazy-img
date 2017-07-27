@@ -9,10 +9,15 @@ angular.module('angularLazyImg').factory('lazyImgHelpers', [
       };
     }
 
-    function isElementInView(elem, offset, winDimensions) {
+    function isElementInView(elem, offset, winDimensions, orientation) {
       var rect = elem.getBoundingClientRect();
       var bottomline = winDimensions.height + offset;
-      return (rect.top >= 0 && rect.top <= bottomline) || (rect.bottom <= bottomline && rect.bottom >= 0 - offset);
+      var rightline = winDimensions.width + offset;
+      if(orientation==='h'){
+          return (rect.left >= 0 && rect.left <= rightline) || (rect.right <= rightline && rect.right >= 0 - offset);
+      }else {
+          return (rect.top >= 0 && rect.top <= bottomline) || (rect.bottom <= bottomline && rect.bottom >= 0 - offset);
+      }
       // return (
       //  rect.left >= 0 && rect.right <= winDimensions.width + offset && (
       //    rect.top >= 0 && rect.top <= bottomline ||

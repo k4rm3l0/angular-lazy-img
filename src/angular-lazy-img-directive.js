@@ -8,7 +8,7 @@ angular.module('angularLazyImg')
 
             function link(scope, element, attributes) {
 
-                var lazyImage = new LazyImgMagic(element);
+                var lazyImage = new LazyImgMagic(element, attributes.orientation);
 
                 var deregister = attributes.$observe('lazyImg', function (newSource) {
                     if (newSource) {
@@ -54,15 +54,11 @@ angular.module('angularLazyImg')
             'use strict';
 
             function link(scope, element, attributes) {
+
                 LazyImgMagic.addContainer(element);
+
                 scope.$on('$destroy', function () {
                     LazyImgMagic.removeContainer(element);
-                });
-                var deregister = attributes.$observe('scrollOrientation', function (orientation) {
-                    if (orientation) {
-                        deregister();
-                        console.log(orientation);
-                    }
                 });
             }
 

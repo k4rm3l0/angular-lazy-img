@@ -19,7 +19,7 @@ angular.module('angularLazyImg').factory('LazyImgMagic', [
     'use strict';
 
     var winDimensions, $win, images, isListening, options;
-    var checkImagesT, saveWinOffsetT, containers;
+    var checkImagesT, saveWinOffsetT, containers, orientation, offset;
 
     images = [];
     isListening = false;
@@ -30,12 +30,14 @@ angular.module('angularLazyImg').factory('LazyImgMagic', [
       winDimensions = lazyImgHelpers.getWinDimensions();
     }, 60);
     containers = [options.container || $win];
+    orientation = options.orientation || 'v';
+    offset = options.offset || 0;
 
     function checkImages(){
       $timeout(function () {
         for(var i = images.length - 1; i >= 0; i--){
           var image = images[i];
-          if(image && lazyImgHelpers.isElementInView(image.$elem[0], options.offset, winDimensions)){
+          if(image && lazyImgHelpers.isElementInView(image.$elem[0], offset, winDimensions, image.orientation)){
             loadImage(image);
             images.splice(i, 1);
           }
@@ -104,8 +106,9 @@ angular.module('angularLazyImg').factory('LazyImgMagic', [
     }
 
     // PHOTO
-    function Photo($elem){
+    function Photo($elem, _orientation){
       this.$elem = $elem;
+      this.orientation = _orientation;
     }
 
     Photo.prototype.setSource = function(source){
@@ -133,6 +136,10 @@ angular.module('angularLazyImg').factory('LazyImgMagic', [
       stopListening();
       containers.splice(containers.indexOf(container), 1);
       startListening();
+    };
+
+    Photo.setOrientation = function (_orientation) {
+      orientation = _orientation;
     };
 
     return Photo;
@@ -176,10 +183,15 @@ angular.module('angularLazyImg').factory('lazyImgHelpers', [
       };
     }
 
-    function isElementInView(elem, offset, winDimensions) {
+    function isElementInView(elem, offset, winDimensions, orientation) {
       var rect = elem.getBoundingClientRect();
       var bottomline = winDimensions.height + offset;
-      return (rect.top >= 0 && rect.top <= bottomline) || (rect.bottom <= bottomline && rect.bottom >= 0 - offset);
+      var rightline = winDimensions.width + offset;
+      if(orientation==='h'){
+          return (rect.left >= 0 && rect.left <= rightline) || (rect.right <= rightline && rect.right >= 0 - offset);
+      }else {
+          return (rect.top >= 0 && rect.top <= bottomline) || (rect.bottom <= bottomline && rect.bottom >= 0 - offset);
+      }
       // return (
       //  rect.left >= 0 && rect.right <= winDimensions.width + offset && (
       //    rect.top >= 0 && rect.top <= bottomline ||
@@ -226,7 +238,7 @@ angular.module('angularLazyImg')
 
             function link(scope, element, attributes) {
 
-                var lazyImage = new LazyImgMagic(element);
+                var lazyImage = new LazyImgMagic(element, attributes.orientation);
 
                 var deregister = attributes.$observe('lazyImg', function (newSource) {
                     if (newSource) {
@@ -272,15 +284,11 @@ angular.module('angularLazyImg')
             'use strict';
 
             function link(scope, element, attributes) {
+
                 LazyImgMagic.addContainer(element);
+
                 scope.$on('$destroy', function () {
                     LazyImgMagic.removeContainer(element);
-                });
-                var deregister = attributes.$observe('scrollOrientation', function (orientation) {
-                    if (orientation) {
-                        deregister();
-                        console.log(orientation);
-                    }
                 });
             }
 

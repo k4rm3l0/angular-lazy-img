@@ -19,7 +19,7 @@ angular.module('angularLazyImg').factory('LazyImgMagic', [
     'use strict';
 
     var winDimensions, $win, images, isListening, options;
-    var checkImagesT, saveWinOffsetT, containers;
+    var checkImagesT, saveWinOffsetT, containers, orientation, offset;
 
     images = [];
     isListening = false;
@@ -30,12 +30,14 @@ angular.module('angularLazyImg').factory('LazyImgMagic', [
       winDimensions = lazyImgHelpers.getWinDimensions();
     }, 60);
     containers = [options.container || $win];
+    orientation = options.orientation || 'v';
+    offset = options.offset || 0;
 
     function checkImages(){
       $timeout(function () {
         for(var i = images.length - 1; i >= 0; i--){
           var image = images[i];
-          if(image && lazyImgHelpers.isElementInView(image.$elem[0], options.offset, winDimensions)){
+          if(image && lazyImgHelpers.isElementInView(image.$elem[0], offset, winDimensions, image.orientation)){
             loadImage(image);
             images.splice(i, 1);
           }
@@ -104,8 +106,9 @@ angular.module('angularLazyImg').factory('LazyImgMagic', [
     }
 
     // PHOTO
-    function Photo($elem){
+    function Photo($elem, _orientation){
       this.$elem = $elem;
+      this.orientation = _orientation;
     }
 
     Photo.prototype.setSource = function(source){
@@ -133,6 +136,10 @@ angular.module('angularLazyImg').factory('LazyImgMagic', [
       stopListening();
       containers.splice(containers.indexOf(container), 1);
       startListening();
+    };
+
+    Photo.setOrientation = function (_orientation) {
+      orientation = _orientation;
     };
 
     return Photo;
